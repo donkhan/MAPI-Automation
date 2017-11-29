@@ -6,13 +6,6 @@ warnings.filterwarnings("ignore")
 site = "https://api-staging.maxmoney.com/v1"
 (u,p) = ("maxmoney","maxmoney@@1")
 
-
-def print_response(text,response):
-    print text
-    print response.status_code
-    print response.content
-
-
 headers = {}
 
 
@@ -25,7 +18,7 @@ def auth():
         return auth()
     print r.status_code
     print r.content
-    raise('Auth Fails')
+    raise 'Auth Failure'
 
 
 def setup_module(module):
@@ -80,6 +73,7 @@ def main():
 
     except:
         print 'Sorry Unable to execute test cases'
+
 
 if __name__ == "__main__":
     main()

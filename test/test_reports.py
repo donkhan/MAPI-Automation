@@ -37,15 +37,23 @@ def test_user_report_with_out_role():
 def test_user_report_with_role():
     response = requests.post(site + "/reports/user", verify=False, headers=headers,
                             data={'from': "2017-1-1",'to':'2018-1-1','type':'csv','role':'financeManager'})
-    print response.content
     assert response.status_code == 200
+    assert_role(response.content, "financeManager")
 
 
 def test_user_report_with_customer():
     response = requests.post(site + "/reports/user", verify=False, headers=headers,
                             data={'from': "2017-1-1",'to':'2018-1-1','type':'csv','role':'customer'})
-    print response.content
     assert response.status_code == 200
+    assert_role(response.content,"customer")
+
+
+def assert_role(content,role):
+    lines = content.split("\n")
+    for line in lines[1:len(lines)-1]:
+        tokens = line.split(",")
+        print tokens[0] + " -> " + tokens[2]
+        assert tokens[2] == role
 
 
 def main():

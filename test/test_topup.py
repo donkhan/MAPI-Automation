@@ -31,6 +31,11 @@ def test_indian_mobile():
     assert response.status_code == 200
 
 
+def test_malaysian_mobile():
+    response = requests.get(site + "/topup/+60107860848/product", verify=False,headers = headers)
+    assert response.status_code == 200
+
+
 def test_non_exist_indian_mobile():
     response = requests.get(site + "/topup/+919845104104104/product", verify=False,headers = headers)
     assert response.status_code == 200

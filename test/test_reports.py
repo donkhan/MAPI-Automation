@@ -47,6 +47,7 @@ def test_user_report_with_customer():
     print response.content
     assert response.status_code == 200
 
+
 def main():
     global headers
     try:

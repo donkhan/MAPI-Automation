@@ -1,5 +1,6 @@
 import requests
 import warnings
+import time
 
 warnings.filterwarnings("ignore")
 
@@ -36,11 +37,25 @@ def test_update_account():
     assert response.status_code == 200
     assert response.json()['creditLimit'] == 1000
 
+
+def test_create_account():
+    name = 'test' + str(int(round(time.time() * 1000))) + "@maxmoney.com"
+    response = requests.post(site + "/topup/accounts/account", verify=False, headers=headers,
+                            data={'creditLimit': 1000,'creditAllowed' : 'true','accountName': name,
+                                  'amount':1000,'status' : 'Active'})
+    assert response.status_code == 200
+    assert response.json()['creditLimit'] == 1000
+    response = requests.post(site + "/topup/accounts/account", verify=False, headers=headers,
+                  data={'creditLimit': 1000, 'creditAllowed': 'true', 'accountName': name,
+                        'amount': 1000, 'status': 'Active'})
+    assert response.status_code == 400
+
+
 def main():
     global headers
     try:
         headers = {"Api-Key":auth()}
-        #test_list_accounts()
+        test_list_accounts()
         test_update_account()
     except:
         print 'Sorry Unable to execute test cases'

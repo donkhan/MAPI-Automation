@@ -40,12 +40,20 @@ def test_user_report_with_role():
     print response.content
     assert response.status_code == 200
 
+
+def test_user_report_with_customer():
+    response = requests.post(site + "/reports/user", verify=False, headers=headers,
+                            data={'from': "2017-1-1",'to':'2018-1-1','type':'csv','role':'customer'})
+    print response.content
+    assert response.status_code == 200
+
 def main():
     global headers
     try:
         headers = {"Api-Key":auth()}
         test_user_report_with_out_role()
         test_user_report_with_role()
+        test_user_report_with_customer()
     except:
         print 'Sorry Unable to execute test cases'
 

@@ -28,18 +28,12 @@ def test_content_type():
                         data={'from': "2017-1-1", 'to': '2018-1-1', 'type': 'csv', 'role': 'financeManager'})
     assert response.headers['Content-Type'] == 'text'
 
-def test_user_report_with_role():
-    response = com.post("/reports/user",headers,
-                            data={'from': "2017-1-1",'to':'2018-1-1','type':'csv','role':'financeManager'})
-    assert response.status_code == 200
-    assert_role(response.content, "financeManager")
 
-
-def test_user_report_with_customer():
+def test_user_report_with_role(role):
     response = com.post("/reports/user",headers,
-                            {'from': "2017-1-1",'to':'2018-1-1','type':'csv','role':'customer'})
+                            data={'from': "2017-1-1",'to':'2018-1-1','type':'csv','role':role})
     assert response.status_code == 200
-    assert_role(response.content,"customer")
+    assert_role(response.content, role)
 
 
 def test_user_report_with_junk_to():
@@ -62,8 +56,8 @@ def main():
     headers = {"Api-Key":auth.auth()}
     test_content_type()
     test_user_report_with_out_role()
-    test_user_report_with_role()
-    test_user_report_with_customer()
+    test_user_report_with_role('financeManager')
+    test_user_report_with_role('customer')
     test_user_report_with_junk_to()
 
 if __name__ == "__main__":

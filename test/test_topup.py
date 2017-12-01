@@ -1,11 +1,9 @@
 import requests
 import warnings
 import auth
-import c
+import com
 warnings.filterwarnings("ignore")
 headers = {}
-
-
 
 
 def setup_module(module):
@@ -14,56 +12,53 @@ def setup_module(module):
 
 
 def test_indian_mobile():
-    response = requests.get(c.site + "/topup/+919845104104/product", verify=False,headers = headers)
+    response = com.get("/topup/+919845104104/product",headers)
     assert response.status_code == 200
 
 
 def test_malaysian_mobile():
-    response = requests.get(c.site + "/topup/+60107860848/product", verify=False,headers = headers)
+    response = com.get("/topup/+60107860848/product",headers = headers)
     assert response.status_code == 200
 
 
 def test_non_exist_indian_mobile():
-    response = requests.get(c.site + "/topup/+919845104104104/product", verify=False,headers = headers)
+    response = com.get("/topup/+919845104104104/product", headers)
     assert response.status_code == 200
     assert response.json()['errorCode'] != 0
 
 
 def test_operators_of_india():
-    assert requests.get(c.site + "/topup/766/operators", verify=False, headers=headers).status_code == 200
+    assert com.get("/topup/766/operators", headers).status_code == 200
 
 
 def test_operators_of_non_existent_country():
-    response = requests.get(c.site + "/topup/76600/operators", verify=False, headers=headers)
+    response = com.get("/topup/76600/operators",headers)
     print response.status_code
     assert response.status_code == 200
     assert response.json()['errorCode'] != 0
 
 
 def test_products_of_operator():
-    assert requests.get(c.site + "/topup/operator/1437/product", verify=False, headers=headers).status_code == 200
+    assert com.get("/topup/operator/1437/product", headers).status_code == 200
 
 
 def test_products_of_nonexistent_operator():
-    assert requests.get(c.site + "/topup/operator/1437000/product", verify=False, headers=headers).status_code == 200
+    assert com.get("/topup/operator/1437000/product", headers=headers).status_code == 200
 
 
 def test_ping():
-    assert requests.get(c.site + "/topup/ping", verify=False, headers=headers).status_code == 200
+    assert com.get("/topup/ping",headers).status_code == 200
 
 
 def main():
     global headers
-    try:
-        headers = {"Api-Key":auth.auth()}
-        test_ping()
-        test_indian_mobile()
-        test_non_exist_indian_mobile()
-        test_operators_of_non_existent_country()
-        test_products_of_operator()
-        test_products_of_nonexistent_operator()
-    except:
-        print 'Sorry Unable to execute test cases'
+    headers = {"Api-Key":auth.auth()}
+    test_ping()
+    test_indian_mobile()
+    test_non_exist_indian_mobile()
+    test_operators_of_non_existent_country()
+    test_products_of_operator()
+    test_products_of_nonexistent_operator()
 
 
 if __name__ == "__main__":

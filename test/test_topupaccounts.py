@@ -1,7 +1,5 @@
-import requests
-import warnings
+
 import time
-import c
 import auth
 import com
 
@@ -15,7 +13,6 @@ def setup_module(module):
 def test_list_accounts():
     response = com.get("/topup/accounts", headers)
     assert response.status_code == 200
-
 
 def test_update_account():
     response = com.put("/topup/accounts/account/sa@maxmoney.com",headers,{'creditLimit':1000})
@@ -41,7 +38,7 @@ def main():
     headers = {"Api-Key":auth.auth()}
     test_list_accounts()
     test_update_account()
-    
+
 
 if __name__ == "__main__":
     main()

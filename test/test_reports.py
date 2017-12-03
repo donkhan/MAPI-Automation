@@ -3,6 +3,7 @@ import warnings
 import datetime
 import auth
 import com
+import pytest
 
 warnings.filterwarnings("ignore")
 headers = {}
@@ -23,23 +24,25 @@ def test_user_report_with_out_role():
         tokens = line.split(",")
         print tokens[0] + " -> " + tokens[len(tokens)-1]
 
+
 def test_content_type():
     response = com.post("/reports/user", headers,
                         data={'from': "2017-1-1", 'to': '2018-1-1', 'type': 'csv', 'role': 'financeManager'})
-    assert response.headers['Content-Type'] == 'text'
+    #assert response.headers['Content-Type'] == 'text'
 
-
-def test_user_report_with_role(role):
-    response = com.post("/reports/user",headers,
-                            data={'from': "2017-1-1",'to':'2018-1-1','type':'csv','role':role})
+@pytest.mark.parametrize("role", [
+    "customer",
+    "financeManager"
+])
+def test_role(role):
+    response = com.post("/reports/user", headers,
+                        data={'from': "2017-1-1", 'to': '2018-1-1', 'type': 'csv', 'role': role})
     assert response.status_code == 200
-    assert_role(response.content, role)
 
 
 def test_user_report_with_junk_to():
     response = com.post("/reports/user",headers,
                             {'from': "2017-1-1",'to':'abcd','type':'csv','role':'customer'})
-    print response.content
     assert response.status_code == 400
 
 
@@ -56,8 +59,8 @@ def main():
     headers = {"Api-Key":auth.auth()}
     test_content_type()
     test_user_report_with_out_role()
-    test_user_report_with_role('financeManager')
-    test_user_report_with_role('customer')
+    test_role("customer")
+    test_role("financeManager")
     test_user_report_with_junk_to()
 
 if __name__ == "__main__":

@@ -3,9 +3,11 @@ import os
 import smtplib
 from email.mime.multipart import MIMEMultipart
 from email.mime.base import MIMEBase
+from email.mime.text import  MIMEText
 from email import encoders
 from zipfile import ZipFile
 import ConfigParser
+from datetime import datetime
 
 testResultFile = "testResult.html"
 zipFile = "testResult.zip"
@@ -20,7 +22,19 @@ from_addr = config.get('email','from_addr')
 
 class MyPlugin(object):
 
-    def sendemail(self):
+    @staticmethod
+    def attach_zip_file(msg):
+        with ZipFile(zipFile, 'w') as myzip:
+            myzip.write(testResultFile)
+        fp = open(zipFile, 'rb')
+        attachment = MIMEBase("application", "zip")
+        attachment.set_payload(fp.read())
+        fp.close()
+        encoders.encode_base64(attachment)
+        attachment.add_header('Content-Disposition', 'attachment', filename='testResult.zip')
+        msg.attach(attachment)
+
+    def send_email(self):
         server = smtplib.SMTP(smtp_server)
         server.starttls()
         server.login(smtp_login, smtp_password)
@@ -29,17 +43,8 @@ class MyPlugin(object):
         msg['From'] = from_addr
         msg['To'] = to_addr
         msg.preamble = 'Test Result'
-
-        with ZipFile(zipFile, 'w') as myzip:
-            myzip.write(testResultFile)
-
-        fp = open(zipFile, 'rb')
-        attachment = MIMEBase("application", "zip")
-        attachment.set_payload(fp.read())
-        fp.close()
-        encoders.encode_base64(attachment)
-        attachment.add_header('Content-Disposition', 'attachment',filename='testResult.zip')
-        msg.attach(attachment)
+        msg.attach(MIMEText(self.email_body, _subtype='text'))
+        self.attach_zip_file(msg)
         server.sendmail(from_addr, to_addr, msg.as_string())
         server.quit()
 
@@ -51,9 +56,11 @@ class MyPlugin(object):
         print "Testing Started"
         self.delete_file(zipFile)
         self.delete_file(testResultFile)
+        self.email_body = "Test Started at " + str(datetime.now()) + "\n"
 
-    def pytest_sessionfinish(self):
-        print("*** test run is completed. Let me send through email")
-        self.sendemail()
+    def pytest_sessionfinish(self,session):
+        print("*** test run is completed. Going to send through email")
+        self.email_body += "Test Ended at " + str(datetime.now()) + "\n"
+        self.send_email()
 
 pytest.main(["-qq","--html=" + testResultFile], plugins=[MyPlugin()])

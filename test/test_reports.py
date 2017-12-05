@@ -17,12 +17,12 @@ def setup_module(module):
 def test_user_report_with_out_role():
     response = com.post("/reports/user",headers,
                             {'from': "2017-1-1",'to':'2018-1-1','type':'csv'})
-    print response.headers
+    #print response.headers
     assert response.status_code == 200
     lines = response.content.split("\n")
     for line in lines[1:len(lines) - 1]:
         tokens = line.split(",")
-        print tokens[0] + " -> " + tokens[len(tokens)-1]
+        #print tokens[0] + " -> " + tokens[len(tokens)-1]
 
 
 def test_content_type():
@@ -62,6 +62,7 @@ def main():
     test_role("customer")
     test_role("financeManager")
     test_user_report_with_junk_to()
+
 
 if __name__ == "__main__":
     main()

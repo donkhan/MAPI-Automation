@@ -7,10 +7,8 @@ def get(url,headers):
 
 
 def put(url,headers,data):
-    return requests.put(c.site + url,verify=False, headers=headers,
-                 data=data)
+    return requests.put(c.site + url,verify=False, headers=headers,data=data)
 
 
 def post(url,headers,data):
-    return requests.post(c.site + url,verify=False, headers=headers,
-                 data=data)
+    return requests.post(c.site + url,verify=False, headers=headers,data=data)

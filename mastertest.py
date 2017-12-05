@@ -20,7 +20,14 @@ smtp_password  = config.get("smtp",'password')
 to_addr = config.get('email','to_addr')
 from_addr = config.get('email','from_addr')
 
-class MyPlugin(object):
+
+class EmailPlugin(object):
+
+    def __init__(self):
+        self.email_body = ""
+        self.total_tests = 0
+        self.failed_tests = 0
+        self.passed_tests = 0
 
     @staticmethod
     def attach_zip_file(msg):
@@ -34,12 +41,12 @@ class MyPlugin(object):
         attachment.add_header('Content-Disposition', 'attachment', filename='testResult.zip')
         msg.attach(attachment)
 
-    def send_email(self):
+    def send_email(self,status):
         server = smtplib.SMTP(smtp_server)
         server.starttls()
         server.login(smtp_login, smtp_password)
         msg = MIMEMultipart()
-        msg['Subject'] = 'Test Result'
+        msg['Subject'] = "Test Result : " + status
         msg['From'] = from_addr
         msg['To'] = to_addr
         msg.preamble = 'Test Result'
@@ -48,9 +55,10 @@ class MyPlugin(object):
         server.sendmail(from_addr, to_addr, msg.as_string())
         server.quit()
 
-    def delete_file(self,file):
-        if os.path.isfile(file):
-            os.remove(file)
+    @staticmethod
+    def delete_file(file_location):
+        if os.path.isfile(file_location):
+            os.remove(file_location)
 
     def pytest_sessionstart(self):
         print "Testing Started"
@@ -60,7 +68,16 @@ class MyPlugin(object):
 
     def pytest_sessionfinish(self,session):
         print("*** test run is completed. Going to send through email")
+        self.email_body += "Total Tests " + str(self.total_tests) +  "\nFailed Tests " + str(self.failed_tests) + "\n"
         self.email_body += "Test Ended at " + str(datetime.now()) + "\n"
-        self.send_email()
+        self.send_email('Failure') if self.failed_tests > 0 else self.send_email("Success")
 
-pytest.main(["-qq","--html=" + testResultFile], plugins=[MyPlugin()])
+    def pytest_report_teststatus(self,report):
+        if report.when == 'call':
+            self.total_tests = self.total_tests + 1
+            if report.outcome == 'failed':
+                self.failed_tests = self.failed_tests + 1
+            if report.outcome == 'passed':
+                self.passed_tests = self.passed_tests + 1
+
+pytest.main(["-qq","--html=" + testResultFile], plugins=[EmailPlugin()])

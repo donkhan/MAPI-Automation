@@ -8,6 +8,7 @@ from email import encoders
 from zipfile import ZipFile
 import ConfigParser
 from datetime import datetime
+import argparse
 
 testResultFile = "testResult.html"
 zipFile = "testResult.zip"
@@ -23,16 +24,19 @@ from_addr = config.get('email','from_addr')
 
 class EmailPlugin(object):
 
-    def __init__(self):
+    def __init__(self,mode):
         self.email_body = ""
         self.total_tests = 0
         self.failed_tests = 0
         self.passed_tests = 0
+        self.mode = mode
 
-    @staticmethod
-    def attach_zip_file(msg):
+    def make_zip(self):
         with ZipFile(zipFile, 'w') as myzip:
             myzip.write(testResultFile)
+
+    def attach_zip_file(self,msg):
+        self.make_zip()
         fp = open(zipFile, 'rb')
         attachment = MIMEBase("application", "zip")
         attachment.set_payload(fp.read())
@@ -70,7 +74,9 @@ class EmailPlugin(object):
         print("*** test run is completed. Going to send through email")
         self.email_body += "Total Tests " + str(self.total_tests) +  "\nFailed Tests " + str(self.failed_tests) + "\n"
         self.email_body += "Test Ended at " + str(datetime.now()) + "\n"
-        self.send_email('Failure') if self.failed_tests > 0 else self.send_email("Success")
+
+        if self.mode == 'email':
+            self.send_email('Failure') if self.failed_tests > 0 else self.send_email("Success")
 
     def pytest_report_teststatus(self,report):
         if report.when == 'call':
@@ -80,4 +86,15 @@ class EmailPlugin(object):
             if report.outcome == 'passed':
                 self.passed_tests = self.passed_tests + 1
 
-pytest.main(["-qq","--html=" + testResultFile], plugins=[EmailPlugin()])
+
+def get_mode():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-m')
+    args = parser.parse_args()
+    if args.m:
+        mode = args.m
+    else:
+        mode = "email"
+    return mode
+
+pytest.main(["-qq","--html=" + testResultFile], plugins=[EmailPlugin(get_mode())])

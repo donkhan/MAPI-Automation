@@ -16,6 +16,11 @@ def test_indian_mobile():
     assert response.status_code == 200
 
 
+def test_junk_mobile():
+    response = com.get("/topup/abcd/product",headers)
+    assert response.status_code == 400
+    
+
 def test_malaysian_mobile():
     response = com.get("/topup/+60107860848/product",headers = headers)
     assert response.status_code == 200

@@ -60,19 +60,19 @@ def test_user_report_with_invalid_dates():
 def test_user_report_with_out_date():
     response = com.post("/reports/user", headers,
                         {'from': '', 'to': '', 'type': 'csv', 'role': 'customer'})
-    assert response.status_code == 400
+    assert response.status_code == 200
 
 
 def test_user_report_with_out_from_date():
     response = com.post("/reports/user", headers,
                         {'from': '', 'to': '2018-1-1', 'type': 'csv', 'role': 'customer'})
-    assert response.status_code == 400
+    assert response.status_code == 200
 
 
 def test_user_report_with_out_to_date():
     response = com.post("/reports/user", headers,
                         {'from': '2017-1-1', 'to': '', 'type': 'csv', 'role': 'customer'})
-    assert response.status_code == 400
+    assert response.status_code == 200
 
 
 def test_user_report_with_invalid_from_date():

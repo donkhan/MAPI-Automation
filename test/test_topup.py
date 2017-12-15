@@ -1,4 +1,4 @@
-import requests
+
 import warnings
 import auth
 import com
